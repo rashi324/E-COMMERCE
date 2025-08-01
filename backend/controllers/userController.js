@@ -9,6 +9,31 @@ const createToken = (id) => {
  
 // Route for user login
 const loginUser = async (req,res) => {
+     try {
+        const { email, password } = req.body;
+
+        const user = await userModel.findOne({email});
+
+        if (!user) {
+             return res.json({success:false, message:"User dosen't exists"})
+            }
+
+            const isMatch = await bcrypt.compare(password, user.password)
+            
+       if (isMatch) {
+          
+        const token = createToken(user._id)
+           res.json({success:true,token})
+       }
+       else{
+          res.json({success:false, message: 'Invalid credentails'})
+       }
+
+     } catch (error) {
+        console.log(error);
+      res.json({success:false,message:error.message})
+        
+     }
 
 }
 
@@ -22,7 +47,7 @@ const registerUser = async (req,res) => {
        // checking user already exists or not 
        const exists = await userModel.findOne({email});
        if (exists) {
-           return res.json({success:false, message:"User already exists"})
+          return res.json({success:false, message:"Us er already exists"})
        }
 
        // validating email format and strong password
